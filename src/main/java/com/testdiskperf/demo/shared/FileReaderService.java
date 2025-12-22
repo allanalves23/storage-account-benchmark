@@ -36,15 +36,24 @@ public class FileReaderService {
     }
 
     private String getFileName(DataMockDTO data) {
-        return "ID: "+ data.id() + " - TimeStamp: " + Instant.now().getEpochSecond() + " - " + Instant.now().toEpochMilli() + ".json";
+        return setTimeStamp("ID: "+ data.id(), data);
+    }
+
+    private String getFileName(DataMockDTO data, int index) {
+        return setTimeStamp("ID: "+ (index+1), data); 
+    }
+
+    private String setTimeStamp(String content, DataMockDTO data) {
+        return content + " - TimeStamp: " + Instant.now().getEpochSecond() + " - " + Instant.now().toEpochMilli() + ".json";
     }
 
     public void saveFilesInDisk(Path baseFile, Path outputDir) throws IOException {
         validateOutputDirectory(outputDir);
         List<DataMockDTO> items = readFile(baseFile);
-        
-        for (DataMockDTO p : items) {
-            String filename =  getFileName(p);
+
+        for (int i = 0; i < items.size(); i++) {
+            DataMockDTO p = items.get(i);
+            String filename =  getFileName(p, i);
             try (FileOutputStream fos = new FileOutputStream(outputDir.resolve(filename).toString())) {
                 FileDescriptor fd = fos.getFD();
                 String value = mapper.writeValueAsString(p);
