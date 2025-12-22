@@ -1,10 +1,17 @@
 package com.testdiskperf.demo.shared;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
+import java.io.ByteArrayInputStream;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,6 +24,12 @@ import java.util.List;
 public class FileReaderService {
 
     private final ObjectMapper mapper;
+
+    @Value("${storage.account.connectionString}")
+    private String storageAccountConnectionString;
+
+    @Value("${storage.account.containerSmall}")
+    private String containerSmall;
 
     public FileReaderService(ObjectMapper mapper) {
         this.mapper = mapper;
@@ -64,6 +77,20 @@ public class FileReaderService {
                 System.err.println("Error during synchronous file write: " + e.getMessage());
                 throw e;
             }
+        }
+    }
+
+    public void saveFilesInStorageAccount(Path baseFile) throws IOException {
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+            .connectionString(storageAccountConnectionString)
+            .buildClient();
+
+        List<DataMockDTO> items = readFile(baseFile);
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(this.containerSmall);
+        for (int i = 0; i < items.size(); i++) {
+            BlobClient blobClient = containerClient.getBlobClient(getFileName(items.get(i), i));
+            byte[] jsonBytes = mapper.writeValueAsBytes(items.get(i));
+            blobClient.upload(new ByteArrayInputStream(jsonBytes));
         }
     }
 }

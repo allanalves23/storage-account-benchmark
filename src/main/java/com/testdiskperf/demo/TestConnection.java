@@ -13,7 +13,7 @@ import java.io.StringWriter;
 
 @RestController
 public class TestConnection {
-    @Value("${small-data2.base.path}")
+    @Value("${small-data.base.path}")
     private String basePath;
 
     @Value("${small-data.out.path}")
@@ -30,6 +30,19 @@ public class TestConnection {
         try {
             service.saveFilesInDisk(Path.of(this.basePath), Path.of(this.outDir));
             return ResponseEntity.ok("Arquivos criados com sucesso");
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+
+            return ResponseEntity.status(500).body("Erro: " + e.getMessage() + "\n\n\n\n" + sw.toString() + "\n\n\n\n" + Path.of(".").toAbsolutePath());
+        }
+    }
+
+    @GetMapping("/test-storage-account")
+    public ResponseEntity<String> testStorageAccount() {
+        try {
+            service.saveFilesInStorageAccount(Path.of(this.basePath));
+            return ResponseEntity.ok("Arquivos criados no storage account com sucesso");
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
