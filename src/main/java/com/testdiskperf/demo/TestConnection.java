@@ -13,7 +13,7 @@ import java.io.StringWriter;
 
 @RestController
 public class TestConnection {
-    @Value("${small-data.base.path}")
+    @Value("${small-data2.base.path}")
     private String basePath;
 
     @Value("${small-data.out.path}")
