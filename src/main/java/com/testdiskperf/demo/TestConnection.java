@@ -1,5 +1,6 @@
 package com.testdiskperf.demo;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,12 @@ import java.io.StringWriter;
 
 @RestController
 public class TestConnection {
+    @Value("${small-data.base.path}")
+    private String basePath;
+
+    @Value("${small-data.out.path}")
+    private String outDir;
+
     private final FileReaderService service;
 
     public TestConnection(FileReaderService service) {
@@ -21,11 +28,7 @@ public class TestConnection {
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         try {
-            String basePath = "./src/main/resources/static/data_mock_small.json";
-            String outDir = "./src/main/resources/results/small-data";
-            Path base = Path.of(basePath);
-            Path out = Path.of(outDir);
-            service.saveFilesInDisk(base, out);
+            service.saveFilesInDisk(Path.of(this.basePath), Path.of(this.outDir));
             return ResponseEntity.ok("Arquivos criados com sucesso");
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
