@@ -60,7 +60,9 @@ public class FileReaderService {
         return content + " - TimeStamp: " + Instant.now().getEpochSecond() + " - " + Instant.now().toEpochMilli() + ".json";
     }
 
-    public void saveFilesInDisk(Path baseFile, Path outputDir) throws IOException {
+    public long saveFilesInDisk(Path baseFile, Path outputDir) throws IOException {
+        long startTime = System.currentTimeMillis();
+
         validateOutputDirectory(outputDir);
         List<DataMockDTO> items = readFile(baseFile);
 
@@ -78,9 +80,14 @@ public class FileReaderService {
                 throw e;
             }
         }
+
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
     }
 
-    public void saveFilesInStorageAccount(Path baseFile) throws IOException {
+    public long saveFilesInStorageAccount(Path baseFile) throws IOException {
+        long startTime = System.currentTimeMillis();
+
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
             .connectionString(storageAccountConnectionString)
             .buildClient();
@@ -92,5 +99,8 @@ public class FileReaderService {
             byte[] jsonBytes = mapper.writeValueAsBytes(items.get(i));
             blobClient.upload(new ByteArrayInputStream(jsonBytes));
         }
+
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
     }
 }

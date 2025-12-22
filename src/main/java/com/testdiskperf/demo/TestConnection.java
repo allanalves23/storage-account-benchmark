@@ -28,8 +28,8 @@ public class TestConnection {
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         try {
-            service.saveFilesInDisk(Path.of(this.basePath), Path.of(this.outDir));
-            return ResponseEntity.ok("Arquivos criados com sucesso");
+            long executionTime = service.saveFilesInDisk(Path.of(this.basePath), Path.of(this.outDir));
+            return ResponseEntity.ok("Arquivos criados com sucesso. \n\n\n\n Tempo de execução Ms: "+executionTime);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
@@ -41,8 +41,8 @@ public class TestConnection {
     @GetMapping("/test-storage-account")
     public ResponseEntity<String> testStorageAccount() {
         try {
-            service.saveFilesInStorageAccount(Path.of(this.basePath));
-            return ResponseEntity.ok("Arquivos criados no storage account com sucesso");
+            long executionTime = service.saveFilesInStorageAccount(Path.of(this.basePath));
+            return ResponseEntity.ok("Arquivos criados no storage account com sucesso. \n\n\n\n Tempo de execução Ms: "+executionTime);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
