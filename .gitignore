@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### File in the disk save ###
+src/main/resources/results
