@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bench-sa
+  labels:
+    app: bench-sa
+spec:
+  selector:
+    matchLabels:
+      app: bench-sa
+  template:
+    metadata:
+      labels:
+        app: bench-sa
+    spec:
+      containers:
+      - name: bench-sa
+        image: testacrallan.azurecr.io/bench-sa:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "2"  
+            memory: "4096Mi" 
+          requests:
+            cpu: "1" 
+            memory: "1024Mi"
+        volumeMounts:
+        - mountPath: "/bench-sa/results"
+          name: volume
+          readOnly: false
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: azure-managed-disk
+            # claimName: azure-blob-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bench-sa
+spec:
+  selector:
+    app: bench-sa
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
+# ---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: bench-sa-hpa
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: bench-sa
+#   minReplicas: 1
+#   maxReplicas: 1
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 50
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: azure-managed-disk
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: managed-csi-premium
+  resources:
+    requests:
+      storage: 5Gi
+---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: azure-blob-storage
+# spec:
+#   accessModes:
+#   - ReadWriteMany
+#   storageClassName: azureblob-fuse-premium2
+#   resources:
+#     requests:
+#       storage: 5Gi
