@@ -36,9 +36,9 @@ public class FileReaderService {
         this.mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
 
-    private List<DataMockDTO> readFile(Path baseFile) throws IOException {
+    private List<LargeDataMockDTO> readFile(Path baseFile) throws IOException {
         byte[] jsonBytes = Files.readAllBytes(baseFile);
-        List<DataMockDTO> items = mapper.readValue(jsonBytes, new TypeReference<List<DataMockDTO>>() {});
+        List<LargeDataMockDTO> items = mapper.readValue(jsonBytes, new TypeReference<List<LargeDataMockDTO>>() {});
         return items;
     }
 
@@ -48,15 +48,15 @@ public class FileReaderService {
         }
     }
 
-    private String getFileName(DataMockDTO data) {
+    private String getFileName(LargeDataMockDTO data) {
         return setTimeStamp("ID: "+ data.id(), data);
     }
 
-    private String getFileName(DataMockDTO data, int index) {
+    private String getFileName(LargeDataMockDTO data, int index) {
         return setTimeStamp("ID: "+ (index+1), data); 
     }
 
-    private String setTimeStamp(String content, DataMockDTO data) {
+    private String setTimeStamp(String content, LargeDataMockDTO data) {
         return content + " - TimeStamp: " + Instant.now().getEpochSecond() + " - " + Instant.now().toEpochMilli() + ".json";
     }
 
@@ -64,10 +64,10 @@ public class FileReaderService {
         long startTime = System.currentTimeMillis();
 
         validateOutputDirectory(outputDir);
-        List<DataMockDTO> items = readFile(baseFile);
+        List<LargeDataMockDTO> items = readFile(baseFile);
 
         for (int i = 0; i < items.size(); i++) {
-            DataMockDTO p = items.get(i);
+            LargeDataMockDTO p = items.get(i);
             String filename =  getFileName(p, i);
             try (FileOutputStream fos = new FileOutputStream(outputDir.resolve(filename).toString())) {
                 FileDescriptor fd = fos.getFD();
@@ -92,7 +92,7 @@ public class FileReaderService {
             .connectionString(storageAccountConnectionString)
             .buildClient();
 
-        List<DataMockDTO> items = readFile(baseFile);
+        List<LargeDataMockDTO> items = readFile(baseFile);
         BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(this.containerSmall);
         for (int i = 0; i < items.size(); i++) {
             BlobClient blobClient = containerClient.getBlobClient(getFileName(items.get(i), i));
